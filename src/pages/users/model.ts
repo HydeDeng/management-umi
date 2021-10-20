@@ -56,16 +56,21 @@
 //     },
 //   },
 // };
+//export default UserModel;
 
-// export default UserModel;
-import {Reducer, Effect, Subscription} from 'umi'
+// 上面是JS的i写法，下面是TS的写法
+import { Reducer, Effect, Subscription } from 'umi'
+import { getRemoteList,updateRemoteData } from './service'
 
 interface UserModelType {
   namespace: 'users';
   state: {};
-  reducers:{};
-  effects:{};
-  subscriptions:{
+  reducers: {};
+  effects: {
+    getRemote: Effect,
+    edit: Effect;
+  };
+  subscriptions: {
     setup: Subscription;
   }
 }
@@ -76,21 +81,42 @@ const UserModel: UserModelType = {
   state: {},
   //{action} == {type, payload}
   reducers: {
-    // getlist(state, { type, payload }) {
-    //   // return newState;
-    // }
+    // （state, action） -> (state, {type, payload}) -> (state, {payload}) 一般我们不写type
+    getlist(state, { payload }) {
+      // console.log(`payload`, payload)
+      return payload;
+    }
   },
   // 格式为 *(action, effects) => void 或 [*(action, effects) => void, { type }]， effect返回的是空值，因为他不会直接给页面传递值
   effects: {
-    // *function_name({ type, payload }, effects) {
-    //   // yield put()
-    // }
+    *getRemote(action, { put, call }) {
+      const data = yield call(getRemoteList);
+      // console.log(`data`, data)
+      yield put({
+        type: 'getlist',
+        payload: data
+      })
+    },
+    *edit({paylaod:{id, values}}, {put, call}){
+      console.log(`id here`,id);
+      console.log(`edit values here`,values);     
+      const data = yield call(updateRemoteData,({values, id}));
+      console.log(`data`, data);
+    }
   },
   subscriptions: {
     setup({ dispatch, history }) {
+      history.listen(({ pathname }) => {
+        if (pathname === '/users') {
+          dispatch({
+            type: 'getRemote',
+          });
+        };
+      });
       //body
     }
   }
+
 };
 
 export default UserModel;
