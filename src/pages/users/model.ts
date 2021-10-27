@@ -60,7 +60,7 @@
 
 // 上面是JS的i写法，下面是TS的写法
 import { Reducer, Effect, Subscription } from 'umi'
-import { getRemoteList,updateRemoteData } from './service'
+import { getRemoteList, updateRemoteData, deleteRemoteData, addRemoteData } from './service'
 
 interface UserModelType {
   namespace: 'users';
@@ -69,6 +69,8 @@ interface UserModelType {
   effects: {
     getRemote: Effect,
     edit: Effect;
+    delete: Effect;
+    add: Effect;
   };
   subscriptions: {
     setup: Subscription;
@@ -97,12 +99,32 @@ const UserModel: UserModelType = {
         payload: data
       })
     },
-    *edit({paylaod:{id, values}}, {put, call}){
-      console.log(`id here`,id);
-      console.log(`edit values here`,values);     
-      const data = yield call(updateRemoteData,({values, id}));
-      console.log(`data`, data);
-    }
+    *edit({ paylaod: { id, values } }, { put, call }) {
+      console.log(`id here`, id);
+      console.log(`edit values here`, values);
+      const data = yield call(updateRemoteData, ({ values, id }));
+      console.log(`edit data`, data);
+      //编辑之后，刷新界面
+      yield put({
+        type: 'getRemote',
+      })
+    },
+    *delete({ paylaod: { id } }, { put, call }) {
+      console.log(`delete values by id`, id);
+      const data = yield call(deleteRemoteData, ({ id }));
+      console.log(`delete data`, data);
+      //删除之后，刷新界面
+      yield put({
+        type: 'getRemote',
+      })
+    },
+    *add({ paylaod: { values } }, { put, call }) {
+      const data = yield call(addRemoteData, ({values}));
+      //添加之后，刷新界面
+      yield put({
+        type: 'getRemote',
+      })
+    },
   },
   subscriptions: {
     setup({ dispatch, history }) {

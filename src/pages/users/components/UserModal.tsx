@@ -9,12 +9,17 @@ const layout = {
 
 export const UserModal = (props) => {
     // console.log(`props.record`, props.record)
-    const {onFinish} = props
+    const { onFinish } = props
     const [form] = Form.useForm();
     //这里用异步的方式更新表单数据，防止页面报错，因为数据是在生命周期的componentDidmount里面更新
     //下面的函数的意思是，一旦数组里面的值发生改变props.visible， 那就执行第一个函数
     useEffect(() => {
-        form.setFieldsValue(props.record);
+        console.log(`userEffect props.record `, props.record)
+        if (props.record) {
+            form.setFieldsValue(props.record);
+        } else {
+            form.resetFields()
+        }
     }, [props.visible]);
 
     const onFinishFailed = (errorInfo: any) => {
@@ -24,7 +29,7 @@ export const UserModal = (props) => {
     const onOK = () => {
         form.submit()
     }
-    
+
 
     return (
         <React.Fragment>

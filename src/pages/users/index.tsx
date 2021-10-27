@@ -3,7 +3,7 @@
 // }
 
 import React, { useState } from 'react'
-import { Table, Tag, Space, message } from 'antd';
+import { Table, Tag, Space, message ,Button} from 'antd';
 import { connect, Dispatch } from 'umi';
 import { UserModal } from '../users/components/UserModal'
 import { UserPopconfirmModal } from './components/UserPopconfirmModal';
@@ -51,7 +51,7 @@ const index = ({ users, dispatch }) => {
                     <a onClick={() => {
                         editModelHandle(record)
                     }}>Edit</a>
-                    <UserPopconfirmModal onConfirm={confirmDelete} alink={deleteLink}></UserPopconfirmModal>
+                    <UserPopconfirmModal dispatch={dispatch} record={record} alink={deleteLink}></UserPopconfirmModal>
                 </Space>
             ),
         },
@@ -76,16 +76,26 @@ const index = ({ users, dispatch }) => {
         })
     }
 
-    const onFinish = (values: any) => {
-        // console.log('Success:', values);
-        updateDataToRemote(values)
-    };
-
-    const confirmDelete = (e) => {
-        console.log(e);
-        message.success('Click on Yes');
-        
+    const addDataToRemote = (values: any) => {
+        console.log(`addData`, values);
+        dispatch({
+            type: 'users/add',
+            paylaod: {
+                values
+            }
+        })
     }
+
+    const onFinish = (values: any) => {
+        console.log('record finish values:', record);
+        //判断record如果没有值，那就做添加操作，如果有值，那就做更新操作
+        if(record != undefined){
+            updateDataToRemote(values)
+        }else{
+            addDataToRemote(values)
+        }
+        setModalVisible(false)
+    };
 
     const deleteLink = <a onClick={() => {
         popconfirmModelHandle(record)
@@ -96,8 +106,14 @@ const index = ({ users, dispatch }) => {
         console.log(`xxxrecord`, record)
     };
 
+    const addDataHandler = () =>{
+        setModalVisible(true)
+        setRecord(undefined)
+    };
+
     return (
         <div className='list-table'>
+            <Button type="primary" onClick={addDataHandler}>Add</Button>
             <Table columns={columns} dataSource={users.data} rowKey='id' />
             <UserModal handleCancel={() => setModalVisible(false)} visible={modalVisible} record={record} onFinish={onFinish}></UserModal>
         </div>
